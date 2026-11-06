@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Exercise Planner</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Exercise Planner</h1>
+        <p>You have <strong>1000 points</strong>. Put them on the muscles you want to train. The more points a muscle gets, the more of the workout goes to it.</p>
+      </header>
+
+      <section class="card">
+        <div class="points">
+          <span>Points left: <strong id="remaining">1000</strong> / 1000</span>
+          <div class="bar"><div id="points-bar"></div></div>
+        </div>
+        <div id="dials"></div>
+        <div class="actions">
+          <button id="even" type="button" class="secondary">Even split</button>
+          <button id="reset" type="button" class="secondary">Reset</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="actions">
+          <label>Workout size
+            <select id="size">
+              <option value="12">Short (12 sets)</option>
+              <option value="20" selected>Normal (20 sets)</option>
+              <option value="28">Long (28 sets)</option>
+            </select>
+          </label>
+          <button id="generate" type="button">Generate plan</button>
+        </div>
+        <div id="plan"><p class="empty">Put some points on a muscle, then generate a plan.</p></div>
+      </section>
+    </main>
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>

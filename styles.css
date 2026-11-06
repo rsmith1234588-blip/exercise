@@ -1,0 +1,83 @@
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --text: #1c1f24;
+  --muted: #5d6470;
+  --accent: #2f6fde;
+  --border: #dde1e7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161a;
+    --card: #1d2026;
+    --text: #e8eaee;
+    --muted: #9aa1ad;
+    --accent: #6c9bf0;
+    --border: #2e333b;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+header p { color: var(--muted); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.points { margin-bottom: 16px; }
+.bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+#points-bar { height: 100%; width: 0; background: var(--accent); transition: width 0.1s; }
+
+.dial {
+  display: grid;
+  grid-template-columns: 110px 1fr 80px;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 0;
+}
+.dial input[type="range"] { width: 100%; accent-color: var(--accent); }
+.dial input[type="number"], select {
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+.actions label { display: flex; gap: 8px; align-items: center; margin-right: auto; }
+
+button {
+  font: inherit;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+button.secondary { background: transparent; color: var(--accent); }
+
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.empty { color: var(--muted); margin-top: 16px; }
+
+@media (max-width: 480px) {
+  .dial { grid-template-columns: 80px 1fr 64px; gap: 8px; }
+}
