@@ -1,4 +1,5 @@
-import { MUSCLES } from "./exercises.js";
+import { MUSCLES } from "./muscles.js";
+import { EXERCISES, IMAGE_BASE } from "./exercise-data.js";
 import { TOTAL_POINTS, clampPoints, generatePlan } from "./planner.js";
 
 const STORAGE_KEY = "exercise-planner:points";
@@ -8,6 +9,7 @@ const remainingEl = document.getElementById("remaining");
 const barEl = document.getElementById("points-bar");
 const planEl = document.getElementById("plan");
 const sizeEl = document.getElementById("size");
+const levelEl = document.getElementById("level");
 
 const points = loadPoints();
 const nameOf = Object.fromEntries(MUSCLES.map((m) => [m.id, m.name]));
@@ -67,23 +69,41 @@ function updateSummary() {
   barEl.style.width = `${(used() / TOTAL_POINTS) * 100}%`;
 }
 
+const escapeHtml = (text) =>
+  String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+function exerciseCard({ exercise: e, sets, reps, muscle }) {
+  const images = e.images
+    .map((src, i) => `<img src="${IMAGE_BASE}${escapeHtml(src)}" alt="${escapeHtml(e.name)}, ${i === 0 ? "start" : "end"} position" loading="lazy">`)
+    .join("");
+  const also = e.secondary.filter((m) => m !== muscle).map((m) => nameOf[m]);
+  return `
+    <article class="exercise">
+      <div class="photos">${images}</div>
+      <div class="info">
+        <h3>${escapeHtml(e.name)}</h3>
+        <p class="prescription"><strong>${sets} sets</strong> × ${escapeHtml(reps)} reps</p>
+        <p class="tags">
+          <span class="tag">${nameOf[muscle]}</span>
+          <span class="tag">${escapeHtml(e.equipment)}</span>
+          <span class="tag">${escapeHtml(e.level)}</span>
+        </p>
+        ${also.length ? `<p class="also">Also works: ${also.join(", ")}</p>` : ""}
+        <details>
+          <summary>How to do it</summary>
+          <ol>${e.instructions.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ol>
+        </details>
+      </div>
+    </article>`;
+}
+
 function renderPlan() {
-  const plan = generatePlan(points, { totalSets: Number(sizeEl.value) });
+  const plan = generatePlan(points, { totalSets: Number(sizeEl.value), level: levelEl.value });
   if (plan.length === 0) {
     planEl.innerHTML = `<p class="empty">Put some points on a muscle, then generate a plan.</p>`;
     return;
   }
-  planEl.innerHTML = `
-    <table>
-      <thead><tr><th>Exercise</th><th>Muscle</th><th>Sets</th><th>Reps</th></tr></thead>
-      <tbody>
-        ${plan
-          .map(
-            (e) => `<tr><td>${e.name}</td><td>${nameOf[e.muscle]}</td><td>${e.sets}</td><td>${e.reps}</td></tr>`
-          )
-          .join("")}
-      </tbody>
-    </table>`;
+  planEl.innerHTML = plan.map(exerciseCard).join("");
 }
 
 document.getElementById("generate").addEventListener("click", renderPlan);
@@ -99,4 +119,5 @@ document.getElementById("even").addEventListener("click", () => {
   renderDials();
 });
 
+document.getElementById("library-count").textContent = EXERCISES.length;
 renderDials();

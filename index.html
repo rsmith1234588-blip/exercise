@@ -34,10 +34,21 @@
               <option value="28">Long (28 sets)</option>
             </select>
           </label>
+          <label>Experience
+            <select id="level">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="expert">Expert</option>
+            </select>
+          </label>
           <button id="generate" type="button">Generate plan</button>
         </div>
         <div id="plan"><p class="empty">Put some points on a muscle, then generate a plan.</p></div>
       </section>
+      <footer>
+        Picks from <span id="library-count">700+</span> exercises. Exercise data and photos come from
+        <a href="https://github.com/yuhonas/free-exercise-db">free-exercise-db</a> (public domain).
+      </footer>
     </main>
     <script type="module" src="src/app.js"></script>
   </body>

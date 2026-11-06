@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { allocate, clampPoints, generatePlan } from "../src/planner.js";
+import { EXERCISES } from "../src/exercise-data.js";
+import { MUSCLES, LEVELS } from "../src/muscles.js";
 
 const totalSets = (plan) => plan.reduce((sum, e) => sum + e.sets, 0);
 
@@ -38,4 +40,34 @@ test("a dial cannot push the total over 1000", () => {
   assert.equal(clampPoints({ chest: 800, back: 0 }, "back", 500), 200);
   assert.equal(clampPoints({ chest: 800, back: 100 }, "chest", 900), 900);
   assert.equal(clampPoints({ chest: 0 }, "chest", -50), 0);
+});
+
+test("library is big and every exercise has photos and instructions", () => {
+  assert.ok(EXERCISES.length >= 500, `only ${EXERCISES.length} exercises`);
+  for (const e of EXERCISES) {
+    assert.ok(e.images.length > 0, `${e.name} has no image`);
+    assert.ok(e.instructions.length > 0, `${e.name} has no instructions`);
+    assert.ok(LEVELS.includes(e.level), `${e.name} has level ${e.level}`);
+  }
+});
+
+test("every muscle dial has beginner exercises", () => {
+  for (const m of MUSCLES) {
+    assert.ok(
+      EXERCISES.some((e) => e.primary === m.id && e.level === "beginner"),
+      `no beginner exercises for ${m.id}`
+    );
+  }
+});
+
+test("beginner plans only use beginner exercises", () => {
+  const plan = generatePlan({ quads: 500, back: 500 }, { level: "beginner", seed: 7 });
+  assert.ok(plan.length > 0);
+  assert.ok(plan.every((p) => p.exercise.level === "beginner"));
+});
+
+test("an exercise isn't repeated within a plan", () => {
+  const plan = generatePlan({ calves: 1000 }, { totalSets: 28, seed: 9 });
+  const ids = plan.map((p) => p.exercise.id);
+  assert.equal(new Set(ids).size, ids.length);
 });

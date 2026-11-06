@@ -1,4 +1,5 @@
-import { EXERCISES } from "./exercises.js";
+import { EXERCISES } from "./exercise-data.js";
+import { LEVELS } from "./muscles.js";
 
 export const TOTAL_POINTS = 1000;
 export const SETS_PER_EXERCISE = 4;
@@ -56,17 +57,22 @@ function shuffle(list, rng) {
 /**
  * Build a workout from the user's point dials.
  * @param {Record<string, number>} points muscle id -> points (sum <= 1000)
- * @param {{ totalSets?: number, seed?: number, library?: typeof EXERCISES }} [options]
- * @returns {{ muscle: string, name: string, sets: number, reps: string }[]}
+ * @param {{ totalSets?: number, seed?: number, level?: string, library?: typeof EXERCISES }} [options]
+ *   `level` is the hardest level allowed ("beginner", "intermediate" or "expert").
+ * @returns {{ muscle: string, sets: number, reps: string, exercise: object }[]}
  */
 export function generatePlan(points, options = {}) {
-  const { totalSets = 20, seed = Date.now(), library = EXERCISES } = options;
+  const { totalSets = 20, seed = Date.now(), level = "expert", library = EXERCISES } = options;
+  const maxLevel = LEVELS.indexOf(level);
   const rng = makeRng(seed);
   const setsByMuscle = allocate(points, totalSets);
   const plan = [];
 
   for (const [muscle, sets] of Object.entries(setsByMuscle)) {
-    const pool = shuffle(library.filter((e) => e.primary === muscle), rng);
+    const forMuscle = library.filter((e) => e.primary === muscle);
+    const atLevel = forMuscle.filter((e) => LEVELS.indexOf(e.level) <= maxLevel);
+    // If nothing matches the level, use any exercise rather than drop the muscle.
+    const pool = shuffle(atLevel.length > 0 ? atLevel : forMuscle, rng);
     if (pool.length === 0) continue;
 
     // About SETS_PER_EXERCISE sets per exercise, limited by how many exist.
@@ -78,9 +84,9 @@ export function generatePlan(points, options = {}) {
       const ex = pool[i];
       plan.push({
         muscle,
-        name: ex.name,
         sets: base + (extra-- > 0 ? 1 : 0),
         reps: ex.reps,
+        exercise: ex,
       });
     }
   }

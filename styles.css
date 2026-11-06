@@ -60,7 +60,8 @@ header p { color: var(--muted); }
 }
 
 .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
-.actions label { display: flex; gap: 8px; align-items: center; margin-right: auto; }
+.actions label { display: flex; gap: 8px; align-items: center; }
+.actions button#generate { margin-left: auto; }
 
 button {
   font: inherit;
@@ -73,10 +74,46 @@ button {
 }
 button.secondary { background: transparent; color: var(--accent); }
 
-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
-th { color: var(--muted); font-weight: 600; font-size: 14px; }
+.exercise {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.exercise:last-child { border-bottom: 0; }
+.photos { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-content: start; }
+.photos img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--border);
+}
+.photos img:only-child { grid-column: span 2; aspect-ratio: 3 / 2; }
+.exercise h3 { margin: 0 0 4px; font-size: 18px; }
+.prescription { margin: 0 0 8px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.tag {
+  font-size: 13px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.also { color: var(--muted); font-size: 14px; margin: 0 0 8px; }
+details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+details ol { padding-left: 20px; margin: 8px 0 0; }
+details li { margin-bottom: 4px; }
+footer { color: var(--muted); font-size: 14px; text-align: center; }
+footer a { color: var(--accent); }
 .empty { color: var(--muted); margin-top: 16px; }
+
+@media (max-width: 600px) {
+  .exercise { grid-template-columns: 1fr; }
+}
 
 @media (max-width: 480px) {
   .dial { grid-template-columns: 80px 1fr 64px; gap: 8px; }
