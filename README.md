@@ -2,11 +2,11 @@
 
 Spread **1000 points** across a dial for each muscle. The planner turns those points into a workout: the more points a muscle has, the bigger its share of the sets. Put all 1000 on biceps and you get a workout made only of biceps exercises.
 
-It picks from a library of **726 exercises**. Each one comes with start and end photos, step-by-step instructions, equipment and difficulty level.
+Every exercise is **bodyweight**. The library has 58 of them, and each comes with stick-figure drawings of the start and end positions, step-by-step instructions, a difficulty level and any equipment needed (such as a pull-up bar, bench or wall).
 
 ## Run it
 
-Needs Node 18 or newer. There are no dependencies to install.
+Needs Node 18 or newer. There are no dependencies to install, and it works offline.
 
 ```bash
 npm start
@@ -22,35 +22,38 @@ npm test
 
 - **Dials** (`src/app.js`): one slider per muscle. A dial can't push the total past 1000 (`clampPoints`).
 - **Allocation** (`src/planner.js`, `allocate`): the workout's total sets (12, 20 or 28) are split between muscles in proportion to their points. The largest-remainder method makes sure the counts always add up to the total.
-- **Exercise picks** (`generatePlan`): each muscle gets about 4 sets per exercise, picked at random from that muscle's exercises. The experience setting limits picks to that level and easier. Passing a seed makes the plan repeatable.
+- **Exercise picks** (`generatePlan`): each muscle gets about 4 sets per exercise, picked at random from that muscle's exercises. The experience setting limits picks to that level and easier. If a muscle runs out of exercises, the planner adds ones that work it as a secondary muscle, and an exercise is never used twice in one plan. Passing a seed makes the plan repeatable.
 
-## Exercise data
+## Drawings
 
-`src/exercise-data.js` is generated from [free-exercise-db](https://github.com/yuhonas/free-exercise-db), which is public domain. The import is pinned to a fixed commit, and photos load from that commit on raw.githubusercontent.com, so the app needs internet to show them. To rebuild the file:
+The diagrams are drawn in code by `src/figure.js`, so there are no image files. Each pose is a set of joint angles (0° points down, 90° forward, 180° up):
 
-```bash
-node scripts/import-exercises.js
+```js
+const SQUAT = { t: 145, a: [[90, 90]], l: [[80, -25, 90]] };
+//              torso    arms: upper, fore   legs: thigh, shin, foot
 ```
 
-The script drops stretching and cardio, maps the dataset's muscles onto the dials (for example lats, traps and lower back all count as Back) and suggests rep ranges based on the exercise type.
+The figure is placed on the floor automatically. A pose can also rest on props: `level` tilts the body so two points touch the floor or a bench (for example hands and toes in a push-up), `hang` hangs it from a pull-up bar, and `box`, `bars`, `wall` and `strap` draw equipment. The comment at the top of `figure.js` lists every option.
+
+To add an exercise, add an entry to `src/exercise-data.js` with a `start` and `end` pose (or `hold: true` and just `start`). `npm test` checks that every drawing stays inside its frame.
 
 ## Project layout
 
 ```
-index.html          page markup
-styles.css          styles (light and dark)
-src/muscles.js      muscle dials and levels
-src/exercise-data.js  generated exercise library (726 exercises)
-src/planner.js      allocation and plan generation (pure, tested)
-src/app.js          UI wiring
-server.js           tiny static server
-scripts/            data import script
-tests/              node:test unit tests
+index.html            page markup
+styles.css            styles (light and dark)
+src/muscles.js        muscle dials and levels
+src/exercise-data.js  exercise library with poses and instructions
+src/figure.js         stick-figure drawing engine (SVG)
+src/planner.js        allocation and plan generation (pure, tested)
+src/app.js            UI wiring
+server.js             tiny static server
+tests/                node:test unit tests
 ```
 
 ## Ideas for next steps
 
-- Count secondary muscles toward the points (the data already lists them)
-- Equipment filter (bodyweight only, dumbbells, gym); each exercise already has its equipment
+- "No equipment at all" filter (each exercise already lists what it needs)
+- Animate between the start and end drawings
 - Save presets and plan weekly splits
 - Swap or reroll a single exercise

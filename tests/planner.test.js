@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { allocate, clampPoints, generatePlan } from "../src/planner.js";
 import { EXERCISES } from "../src/exercise-data.js";
 import { MUSCLES, LEVELS } from "../src/muscles.js";
+import { renderFigure, layout, FLOOR } from "../src/figure.js";
 
 const totalSets = (plan) => plan.reduce((sum, e) => sum + e.sets, 0);
 
@@ -42,12 +43,30 @@ test("a dial cannot push the total over 1000", () => {
   assert.equal(clampPoints({ chest: 0 }, "chest", -50), 0);
 });
 
-test("library is big and every exercise has photos and instructions", () => {
-  assert.ok(EXERCISES.length >= 500, `only ${EXERCISES.length} exercises`);
+test("every exercise is complete", () => {
+  assert.ok(EXERCISES.length >= 50, `only ${EXERCISES.length} exercises`);
+  const ids = new Set();
   for (const e of EXERCISES) {
-    assert.ok(e.images.length > 0, `${e.name} has no image`);
-    assert.ok(e.instructions.length > 0, `${e.name} has no instructions`);
+    assert.ok(!ids.has(e.id), `duplicate id ${e.id}`);
+    ids.add(e.id);
+    assert.ok(MUSCLES.some((m) => m.id === e.primary), `${e.name} has unknown muscle ${e.primary}`);
     assert.ok(LEVELS.includes(e.level), `${e.name} has level ${e.level}`);
+    assert.ok(e.instructions.length >= 3, `${e.name} needs instructions`);
+    assert.ok(e.start, `${e.name} has no start pose`);
+    assert.ok(e.hold || e.end, `${e.name} has no end pose`);
+  }
+});
+
+test("every diagram renders inside its frame", () => {
+  for (const e of EXERCISES) {
+    for (const pose of [e.start, e.end].filter(Boolean)) {
+      const svg = renderFigure(pose, e.name);
+      assert.ok(!svg.includes("NaN"), `${e.name} diagram has NaN`);
+      for (const [x, y] of Object.values(layout(pose).points)) {
+        assert.ok(y >= 0 && y <= FLOOR + 1, `${e.name} goes off the top or through the floor (y=${y.toFixed(1)})`);
+        assert.ok(Math.abs(x) < 200, `${e.name} has a runaway joint`);
+      }
+    }
   }
 });
 
@@ -70,4 +89,11 @@ test("an exercise isn't repeated within a plan", () => {
   const plan = generatePlan({ calves: 1000 }, { totalSets: 28, seed: 9 });
   const ids = plan.map((p) => p.exercise.id);
   assert.equal(new Set(ids).size, ids.length);
+});
+
+test("a muscle with few exercises borrows ones that also work it", () => {
+  const plan = generatePlan({ biceps: 1000 }, { totalSets: 20, level: "beginner", seed: 5 });
+  assert.equal(totalSets(plan), 20);
+  assert.ok(plan.every((p) => p.sets <= 5), "no exercise should need more than 5 sets");
+  assert.ok(plan.every((p) => p.exercise.primary === "biceps" || p.exercise.secondary.includes("biceps")));
 });

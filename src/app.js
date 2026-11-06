@@ -1,5 +1,6 @@
 import { MUSCLES } from "./muscles.js";
-import { EXERCISES, IMAGE_BASE } from "./exercise-data.js";
+import { EXERCISES } from "./exercise-data.js";
+import { renderFigure } from "./figure.js";
 import { TOTAL_POINTS, clampPoints, generatePlan } from "./planner.js";
 
 const STORAGE_KEY = "exercise-planner:points";
@@ -72,21 +73,31 @@ function updateSummary() {
 const escapeHtml = (text) =>
   String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
+// "8-12" -> "8-12 reps", "8-10 / leg" -> "8-10 reps / leg", "30-60 s" stays.
+function formatReps(reps) {
+  if (/\ss$/.test(reps)) return reps;
+  const m = reps.match(/^(\S+)(.*)$/);
+  return `${m[1]} reps${m[2]}`;
+}
+
 function exerciseCard({ exercise: e, sets, reps, muscle }) {
-  const images = e.images
-    .map((src, i) => `<img src="${IMAGE_BASE}${escapeHtml(src)}" alt="${escapeHtml(e.name)}, ${i === 0 ? "start" : "end"} position" loading="lazy">`)
+  const frames = e.hold
+    ? [["Hold", e.start]]
+    : [["Start", e.start], ["End", e.end]];
+  const diagrams = frames
+    .map(([label, pose]) => `<figure>${renderFigure(pose, `${e.name}: ${label.toLowerCase()} position`)}<figcaption>${label}</figcaption></figure>`)
     .join("");
   const also = e.secondary.filter((m) => m !== muscle).map((m) => nameOf[m]);
   return `
     <article class="exercise">
-      <div class="photos">${images}</div>
+      <div class="diagrams">${diagrams}</div>
       <div class="info">
         <h3>${escapeHtml(e.name)}</h3>
-        <p class="prescription"><strong>${sets} sets</strong> × ${escapeHtml(reps)} reps</p>
+        <p class="prescription"><strong>${sets} sets</strong> × ${escapeHtml(formatReps(reps))}</p>
         <p class="tags">
           <span class="tag">${nameOf[muscle]}</span>
-          <span class="tag">${escapeHtml(e.equipment)}</span>
-          <span class="tag">${escapeHtml(e.level)}</span>
+          <span class="tag">${escapeHtml(e.needs ?? "No equipment")}</span>
+          <span class="tag level">${escapeHtml(e.level)}</span>
         </p>
         ${also.length ? `<p class="also">Also works: ${also.join(", ")}</p>` : ""}
         <details>

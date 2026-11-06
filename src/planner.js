@@ -67,16 +67,23 @@ export function generatePlan(points, options = {}) {
   const rng = makeRng(seed);
   const setsByMuscle = allocate(points, totalSets);
   const plan = [];
+  const used = new Set();
+  const fits = (e) => LEVELS.indexOf(e.level) <= maxLevel && !used.has(e.id);
 
   for (const [muscle, sets] of Object.entries(setsByMuscle)) {
-    const forMuscle = library.filter((e) => e.primary === muscle);
-    const atLevel = forMuscle.filter((e) => LEVELS.indexOf(e.level) <= maxLevel);
-    // If nothing matches the level, use any exercise rather than drop the muscle.
-    const pool = shuffle(atLevel.length > 0 ? atLevel : forMuscle, rng);
+    const wanted = Math.max(1, Math.round(sets / SETS_PER_EXERCISE));
+    // Exercises that mainly train this muscle come first. If there aren't
+    // enough, add ones that train it as a secondary muscle.
+    let pool = [
+      ...shuffle(library.filter((e) => e.primary === muscle && fits(e)), rng),
+      ...shuffle(library.filter((e) => e.secondary.includes(muscle) && fits(e)), rng),
+    ].slice(0, wanted);
+    // Nothing at this level: use any exercise rather than drop the muscle.
+    if (pool.length === 0) pool = shuffle(library.filter((e) => e.primary === muscle), rng).slice(0, 1);
     if (pool.length === 0) continue;
+    pool.forEach((e) => used.add(e.id));
 
-    // About SETS_PER_EXERCISE sets per exercise, limited by how many exist.
-    const count = Math.min(pool.length, Math.max(1, Math.round(sets / SETS_PER_EXERCISE)));
+    const count = pool.length;
     const base = Math.floor(sets / count);
     let extra = sets - base * count;
 

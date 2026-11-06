@@ -5,6 +5,11 @@
   --muted: #5d6470;
   --accent: #2f6fde;
   --border: #dde1e7;
+  --figure: #1c1f24;
+  --figure-far: #a3aab5;
+  --panel: #f2f4f7;
+  --prop: #dccfb4;
+  --prop-line: #a08a60;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,6 +20,11 @@
     --muted: #9aa1ad;
     --accent: #6c9bf0;
     --border: #2e333b;
+    --figure: #e8eaee;
+    --figure-far: #6b7380;
+    --panel: #252930;
+    --prop: #5c5444;
+    --prop-line: #8a7a5a;
   }
 }
 
@@ -82,15 +92,19 @@ button.secondary { background: transparent; color: var(--accent); }
   border-bottom: 1px solid var(--border);
 }
 .exercise:last-child { border-bottom: 0; }
-.photos { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; align-content: start; }
-.photos img {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
-  border-radius: 6px;
-  background: var(--border);
-}
-.photos img:only-child { grid-column: span 2; aspect-ratio: 3 / 2; }
+.diagrams { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; align-content: start; }
+.diagrams figure { margin: 0; }
+.diagrams figure:only-child { grid-column: span 2; max-width: 50%; justify-self: center; }
+.diagrams figcaption { text-align: center; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.figure { display: block; width: 100%; aspect-ratio: 1; background: var(--panel); border-radius: 8px; }
+.figure .limb { stroke: var(--figure); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.figure .far { stroke: var(--figure-far); }
+.figure .head { fill: var(--panel); stroke: var(--figure); stroke-width: 2.6; }
+.figure .floor { stroke: var(--figure-far); stroke-width: 1.5; }
+.figure .prop { fill: var(--prop); }
+.figure .prop-line { stroke: var(--prop-line); stroke-width: 1.6; }
+.figure .bar { fill: var(--figure); }
+.figure .strap { stroke: #d0584f; stroke-width: 1.8; stroke-linecap: round; }
 .exercise h3 { margin: 0 0 4px; font-size: 18px; }
 .prescription { margin: 0 0 8px; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
@@ -101,8 +115,8 @@ button.secondary { background: transparent; color: var(--accent); }
   background: var(--bg);
   border: 1px solid var(--border);
   color: var(--muted);
-  text-transform: capitalize;
 }
+.tag.level { text-transform: capitalize; }
 .also { color: var(--muted); font-size: 14px; margin: 0 0 8px; }
 details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 details ol { padding-left: 20px; margin: 8px 0 0; }
@@ -113,6 +127,7 @@ footer a { color: var(--accent); }
 
 @media (max-width: 600px) {
   .exercise { grid-template-columns: 1fr; }
+  .diagrams { max-width: 320px; }
 }
 
 @media (max-width: 480px) {
